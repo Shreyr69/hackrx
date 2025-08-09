@@ -79,24 +79,3 @@ async def answer_with_gemini(context_blocks: List[str], question: str) -> str:
             if not text:
                 text = (data.get("text") or "").strip()
             return text or "Information not found in the document."
-
-
-# NEW: Batch processing for multiple questions
-async def answer_multiple_questions(context_blocks: List[str], questions: List[str]) -> List[str]:
-    """Process multiple questions concurrently with controlled parallelism"""
-    semaphore = asyncio.Semaphore(MAX_CONCURRENT_LLM_CALLS)
-    
-    async def answer_single(q: str) -> str:
-        async with semaphore:
-            return await answer_with_gemini(context_blocks, q)
-    
-    # Process questions in batches
-    batch_size = MAX_CONCURRENT_LLM_CALLS
-    results = []
-    
-    for i in range(0, len(questions), batch_size):
-        batch = questions[i:i + batch_size]
-        batch_results = await asyncio.gather(*[answer_single(q) for q in batch])
-        results.extend(batch_results)
-    
-    return results

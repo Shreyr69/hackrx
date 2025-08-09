@@ -15,7 +15,7 @@ from ..services.document_ingestion import ingest_document
 from ..utils.chunking import build_chunks
 from ..services.embeddings import embed_texts, embed_query
 from ..services.retrieval import Retriever, Chunk
-from ..services.llm import answer_with_gemini, answer_multiple_questions
+from ..services.llm import answer_with_gemini
 
 router = APIRouter()
 
@@ -46,7 +46,7 @@ async def run_endpoint(
     chunk_embeddings = await embed_texts(chunk_texts)
     retriever = Retriever(chunk_embeddings, chunks)
 
-    # OPTIMIZED: Process all questions with improved retrieval and batch LLM processing
+    # OPTIMIZED: Process all questions with improved retrieval
     async def process_question(q: str) -> str:
         q_vec = await embed_query(q)
         top_chunks = retriever.search(q_vec, TOP_K)
@@ -58,31 +58,22 @@ async def run_endpoint(
         # Filter out low-quality chunks and format context
         relevant_chunks = []
         for chunk, score in top_chunks:
-            if score > 0.5:  # Only include chunks with decent similarity
+            if score > 0.3:  # Lowered threshold for better coverage
                 relevant_chunks.append(f"[Chunk {chunk.id} - Score: {score:.2f}] {chunk.text}")
         
         if not relevant_chunks:
             return "Information not found in the document."
         
-        return await answer_multiple_questions(relevant_chunks, q)
+        return await answer_with_gemini(relevant_chunks, q)
 
-    # OPTIMIZED: Use batch processing for better performance
-    if len(payload.questions) <= 3:
-        # For small number of questions, process concurrently
-        answers = await asyncio.gather(*[process_question(q) for q in payload.questions])
-    else:
-        # For larger batches, use the optimized batch processor
-        # First, get all relevant chunks for all questions
-        question_vectors = await asyncio.gather(*[embed_query(q) for q in payload.questions])
-        
-        # Get top chunks for each question
-        all_contexts = []
-        for q_vec in question_vectors:
-            top_chunks = retriever.search(q_vec, TOP_K)
-            relevant_chunks = [f"[Chunk {chunk.id}] {chunk.text}" for chunk, score in top_chunks if score > 0.5]
-            all_contexts.append(relevant_chunks)
-        
-        # Use batch processing for LLM calls
-        answers = await answer_multiple_questions(all_contexts[0], payload.questions)
+    # OPTIMIZED: Process questions concurrently with controlled parallelism
+    semaphore = asyncio.Semaphore(3)  # Limit concurrent LLM calls
+    
+    async def process_with_semaphore(q: str) -> str:
+        async with semaphore:
+            return await process_question(q)
+    
+    # Process all questions concurrently
+    answers = await asyncio.gather(*[process_with_semaphore(q) for q in payload.questions])
 
     return RunResponse(answers=list(answers))

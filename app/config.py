@@ -24,4 +24,4 @@ PORT = int(os.getenv("PORT", 8000))
 
 # NEW: Performance optimizations
 MAX_CONCURRENT_LLM_CALLS = 3  # Limit concurrent LLM calls
-CHUNK_SIMILARITY_THRESHOLD = 0.7  # Minimum similarity score for retrieval
+CHUNK_SIMILARITY_THRESHOLD = 0.3  # Lowered from 0.7 for better retrieval coverage
