@@ -11,13 +11,17 @@ REQUIRED_BEARER_TOKEN = (
 # Gemini API key must be provided via environment variable
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
-# Retrieval / chunking defaults
-DEFAULT_CHUNK_WORDS = 150
-DEFAULT_CHUNK_OVERLAP_WORDS = 30
-TOP_K = 6
+# Retrieval / chunking defaults - OPTIMIZED for better accuracy and speed
+DEFAULT_CHUNK_WORDS = 100  # Reduced from 150 for more precise retrieval
+DEFAULT_CHUNK_OVERLAP_WORDS = 20  # Reduced from 30 for efficiency
+TOP_K = 8  # Increased from 6 for better coverage
 
-# Timeouts
-HTTP_TIMEOUT_SECS = 60
+# Timeouts - OPTIMIZED
+HTTP_TIMEOUT_SECS = 30  # Reduced from 60 for faster failure detection
 
 # Port for deployment (Render sets PORT env var)
 PORT = int(os.getenv("PORT", 8000))
+
+# NEW: Performance optimizations
+MAX_CONCURRENT_LLM_CALLS = 3  # Limit concurrent LLM calls
+CHUNK_SIMILARITY_THRESHOLD = 0.7  # Minimum similarity score for retrieval
