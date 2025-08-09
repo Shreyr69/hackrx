@@ -6,19 +6,20 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 
 from ..config import GEMINI_API_KEY, HTTP_TIMEOUT_SECS, MAX_CONCURRENT_LLM_CALLS
 
-# IMPROVED SYSTEM TEMPLATE for better accuracy
+# IMPROVED SYSTEM TEMPLATE for concise, clean responses
 SYSTEM_TEMPLATE = (
-    "You are an expert compliance and policy analysis assistant. Your task is to provide precise, factual answers "
+    "You are an expert compliance and policy analysis assistant. Provide precise, factual answers "
     "based on the provided document excerpts.\n\n"
     "IMPORTANT GUIDELINES:\n"
     "1. Answer ONLY based on the provided document content\n"
     "2. Be specific with numbers, dates, and conditions\n"
     "3. If information is not in the document, say 'Information not found in the document'\n"
-    "4. Use bullet points for multiple conditions or requirements\n"
-    "5. Quote exact text when possible\n\n"
+    "4. Provide concise, single-paragraph answers without bullet points or formatting\n"
+    "5. Use clear, professional language\n"
+    "6. Include key details but keep responses focused and direct\n\n"
     "Document Excerpts:\n{context}\n\n"
     "User Question: {question}\n\n"
-    "Provide a clear, structured answer:"
+    "Provide a clear, concise answer in a single paragraph:"
 )
 
 # SEMAPHORE for controlling concurrent LLM calls
@@ -54,7 +55,7 @@ async def answer_with_gemini(context_blocks: List[str], question: str) -> str:
         ],
         "generationConfig": {
             "temperature": 0.1,  # Lower temperature for more consistent answers
-            "maxOutputTokens": 1000,  # Limit response length
+            "maxOutputTokens": 500,  # Reduced for more concise responses
             "topP": 0.8,
             "topK": 40
         }
@@ -78,4 +79,14 @@ async def answer_with_gemini(context_blocks: List[str], question: str) -> str:
                 pass
             if not text:
                 text = (data.get("text") or "").strip()
+            
+            # Clean up the response to ensure single-paragraph format
+            if text:
+                # Remove bullet points and excessive formatting
+                text = text.replace("*", "").replace("•", "").replace("-", "")
+                # Remove extra newlines and spaces
+                text = " ".join(text.split())
+                # Ensure it's a single paragraph
+                text = text.replace("\n", " ").strip()
+            
             return text or "Information not found in the document."
