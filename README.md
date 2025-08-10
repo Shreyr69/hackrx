@@ -11,7 +11,7 @@ pip install -r requirements.txt
 
 3. Set environment:
 
-- `GEMINI_API_KEY` = your Google Generative Language API key
+- `OPENAI_API_KEY` = your OpenAI API key
 
 ## Local Run
 
@@ -47,8 +47,8 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    - Go to your service dashboard
    - Click "Environment" tab
    - Add environment variable:
-     - **Key**: `GEMINI_API_KEY`
-     - **Value**: Your actual Gemini API key
+     - **Key**: `OPENAI_API_KEY`
+     - **Value**: Your actual OpenAI API key
 
 5. **Deploy**:
    - Click "Create Web Service"
@@ -56,7 +56,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 ## API
 
-POST `/hackrx/run`
+POST `/api/v1/hackrx/run`
 
 Headers:
 - `Content-Type: application/json`
@@ -79,7 +79,7 @@ Response:
 ## Test Deployed API
 
 Once deployed, your API will be available at:
-`https://your-app-name.onrender.com/hackrx/run`
+`https://your-app-name.onrender.com/api/v1/hackrx/run`
 
 Test with PowerShell:
 ```powershell
@@ -95,5 +95,5 @@ $body = @{
     "What is the waiting period for pre-existing diseases (PED) to be covered?"
   )
 } | ConvertTo-Json -Depth 5
-Invoke-RestMethod -Method Post -Uri "https://your-app-name.onrender.com/hackrx/run" -Headers $headers -Body $body
+Invoke-RestMethod -Method Post -Uri "https://your-app-name.onrender.com/api/v1/hackrx/run" -Headers $headers -Body $body
 ```

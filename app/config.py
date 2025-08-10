@@ -8,8 +8,13 @@ REQUIRED_BEARER_TOKEN = (
     "043dc79bbd910f6e4ea9b57b6705a94ee0677b8b3c80080823b643987dd73fe0"
 )
 
-# Gemini API key must be provided via environment variable
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+# OpenAI API key must be provided via environment variable
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+
+# OpenAI model configuration - Using the latest and most powerful model
+OPENAI_MODEL = "gpt-4o"  # Latest GPT-4o model for best accuracy
+OPENAI_MAX_TOKENS = 1000  # Increased for more detailed responses
+OPENAI_TEMPERATURE = 0.1  # Low temperature for consistent, factual answers
 
 # Retrieval / chunking defaults - OPTIMIZED for better accuracy and speed
 DEFAULT_CHUNK_WORDS = 100  # Reduced from 150 for more precise retrieval

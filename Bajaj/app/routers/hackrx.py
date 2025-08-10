@@ -15,7 +15,7 @@ from ..services.document_ingestion import ingest_document
 from ..utils.chunking import build_chunks
 from ..services.embeddings import embed_texts, embed_query
 from ..services.retrieval import Retriever, Chunk
-from ..services.llm import answer_with_gemini
+from ..services.llm import answer_with_openai
 
 router = APIRouter()
 
@@ -55,7 +55,7 @@ async def run_endpoint(
         top = retriever.search(q_vec, TOP_K)
         # Prepare context with clause references for explainability
         ctx_blocks = [f"[Chunk {c.id}] {c.text}" for (c, _score) in top]
-        ans = await answer_with_gemini(ctx_blocks, q)
+        ans = await answer_with_openai(ctx_blocks, q)
         return ans.strip() or ""
 
     answers = await asyncio.gather(*[answer_one(q) for q in payload.questions])

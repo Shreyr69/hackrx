@@ -15,7 +15,7 @@ from ..services.document_ingestion import ingest_document
 from ..utils.chunking import build_chunks
 from ..services.embeddings import embed_texts, embed_query
 from ..services.retrieval import Retriever, Chunk
-from ..services.llm import answer_with_gemini
+from ..services.llm import answer_with_openai
 
 router = APIRouter()
 
@@ -64,7 +64,7 @@ async def run_endpoint(
         if not relevant_chunks:
             return "Information not found in the document."
         
-        return await answer_with_gemini(relevant_chunks, q)
+        return await answer_with_openai(relevant_chunks, q)
 
     # OPTIMIZED: Process questions concurrently with controlled parallelism
     semaphore = asyncio.Semaphore(3)  # Limit concurrent LLM calls
