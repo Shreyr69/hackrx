@@ -8,18 +8,19 @@ from ..config import OPENAI_API_KEY, OPENAI_MODEL, OPENAI_MAX_TOKENS, OPENAI_TEM
 
 # IMPROVED SYSTEM TEMPLATE for concise, clean responses
 SYSTEM_TEMPLATE = (
-    "You are an expert compliance and policy analysis assistant. Provide precise, factual answers "
+    "You are an expert compliance and policy analysis assistant. Your task is to provide precise, factual answers "
     "based on the provided document excerpts.\n\n"
-    "IMPORTANT GUIDELINES:\n"
-    "1. Answer ONLY based on the provided document content\n"
-    "2. Be specific with numbers, dates, and conditions\n"
-    "3. If information is not in the document, say 'Information not found in the document'\n"
-    "4. Provide concise, single-paragraph answers without bullet points or formatting\n"
-    "5. Use clear, professional language\n"
-    "6. Include key details but keep responses focused and direct\n\n"
+    "CRITICAL REQUIREMENTS:\n"
+    "1. Answer ONLY based on the provided document content - do not make assumptions\n"
+    "2. Be extremely specific with numbers, dates, conditions, and policy terms\n"
+    "3. If information is not explicitly in the document, say 'Information not found in the document'\n"
+    "4. Provide comprehensive, detailed answers in a single paragraph\n"
+    "5. Use exact language from the document when possible\n"
+    "6. Include all relevant details, exceptions, and conditions mentioned\n"
+    "7. If the document mentions specific amounts, percentages, or time periods, include them exactly\n\n"
     "Document Excerpts:\n{context}\n\n"
     "User Question: {question}\n\n"
-    "Provide a clear, concise answer in a single paragraph:"
+    "Provide a comprehensive, accurate answer based solely on the document content:"
 )
 
 # SEMAPHORE for controlling concurrent LLM calls
@@ -37,7 +38,7 @@ async def answer_with_openai(context_blocks: List[str], question: str) -> str:
         raise LLMError("OPENAI_API_KEY not set")
 
     # Limit context length to prevent token overflow
-    max_context_length = 12000  # Increased for OpenAI's better context handling
+    max_context_length = 16000  # Increased for OpenAI's better context handling
     context_text = "\n".join(context_blocks)
     if len(context_text) > max_context_length:
         # Truncate while keeping most relevant parts
@@ -54,10 +55,6 @@ async def answer_with_openai(context_blocks: List[str], question: str) -> str:
     payload = {
         "model": OPENAI_MODEL,
         "messages": [
-            {
-                "role": "system",
-                "content": "You are an expert compliance and policy analysis assistant."
-            },
             {
                 "role": "user",
                 "content": prompt
