@@ -30,3 +30,8 @@ PORT = int(os.getenv("PORT", 8000))
 # NEW: Performance optimizations
 MAX_CONCURRENT_LLM_CALLS = 3  # Limit concurrent LLM calls
 CHUNK_SIMILARITY_THRESHOLD = 0.25  # Balanced threshold for better retrieval coverage
+
+# NEW: Caching configuration
+ENABLE_CACHING = True  # Enable response and embedding caching
+CACHE_SIZE_LIMIT = 1000  # Maximum cache entries
+CACHE_TTL_HOURS = 24  # Cache time-to-live in hours
